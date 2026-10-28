@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import pickle
 from pathlib import Path
+import plotly.express as px
+import plotly.graph_objects as go
 
 # Page Configuration
 st.set_page_config(
@@ -39,6 +41,94 @@ st.markdown(
     the customer is likely to leave the telecom service.
     """
 )
+
+st.divider()
+
+# Analytical Dashboard
+st.header("📊 Customer Analytics Dashboard")
+st.caption(
+    "Model evaluation results are from the held-out test set. "
+    "Customer distribution charts use the public Telco churn CSV when it is available."
+)
+
+metric_cols = st.columns(4)
+metric_cols[0].metric("Model Accuracy", "80.48%")
+metric_cols[1].metric("Churn Precision", "65.62%")
+metric_cols[2].metric("Churn Recall", "55.61%")
+metric_cols[3].metric("Churn F1-score", "60.20%")
+
+chart_col1, chart_col2 = st.columns(2)
+
+with chart_col1:
+    st.subheader("Baseline vs Logistic Regression")
+    performance_df = pd.DataFrame({
+        "Model": ["Dummy Baseline", "Logistic Regression"],
+        "Accuracy (%)": [73.46, 80.48],
+    })
+    fig_performance = px.bar(
+        performance_df,
+        x="Model",
+        y="Accuracy (%)",
+        text="Accuracy (%)",
+        title="Accuracy Comparison",
+        range_y=[0, 100],
+    )
+    fig_performance.update_traces(texttemplate="%{text:.2f}%", textposition="outside")
+    st.plotly_chart(fig_performance, use_container_width=True)
+
+with chart_col2:
+    st.subheader("Confusion Matrix")
+    # Rows: actual [No, Yes]; columns: predicted [No, Yes].
+    confusion_values = [[926, 109], [166, 208]]
+    fig_cm = go.Figure(data=go.Heatmap(
+        z=confusion_values,
+        x=["Predicted: No", "Predicted: Yes"],
+        y=["Actual: No", "Actual: Yes"],
+        text=confusion_values,
+        texttemplate="%{text}",
+        colorscale="Blues",
+        showscale=True,
+    ))
+    fig_cm.update_layout(title="Test Set Predictions", xaxis_title="Prediction", yaxis_title="Actual")
+    st.plotly_chart(fig_cm, use_container_width=True)
+
+# Optional dataset-driven charts. Keep the CSV beside app.py in the deployed repo.
+DATA_PATH = Path(__file__).parent / "WA_Fn-UseC_-Telco-Customer-Churn.csv"
+if DATA_PATH.exists():
+    try:
+        dashboard_df = pd.read_csv(DATA_PATH)
+        if "Churn" in dashboard_df.columns:
+            st.subheader("Customer Churn Distribution")
+            churn_counts = (
+                dashboard_df["Churn"]
+                .value_counts()
+                .rename_axis("Churn Status")
+                .reset_index(name="Customers")
+            )
+            st.plotly_chart(
+                px.pie(churn_counts, names="Churn Status", values="Customers", hole=0.45,
+                       title="Customers Who Stayed vs Churned"),
+                use_container_width=True,
+            )
+
+            if "Contract" in dashboard_df.columns:
+                st.subheader("Churn by Contract Type")
+                contract_churn = (
+                    dashboard_df.groupby(["Contract", "Churn"]).size()
+                    .reset_index(name="Customers")
+                )
+                st.plotly_chart(
+                    px.bar(contract_churn, x="Contract", y="Customers", color="Churn",
+                           barmode="group", title="Customer Churn Across Contract Types"),
+                    use_container_width=True,
+                )
+    except Exception as error:
+        st.warning(f"Could not load dashboard dataset: {error}")
+else:
+    st.info(
+        "To show customer distribution and contract charts, add "
+        "'WA_Fn-UseC_-Telco-Customer-Churn.csv' to the same GitHub repository as app.py."
+    )
 
 st.divider()
 
