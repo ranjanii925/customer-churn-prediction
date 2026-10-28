@@ -316,8 +316,16 @@ if submitted:
             fill_value=0
         )
 
-        # Predict churn
-        prediction = model.predict(customer_encoded)[0]
+        # Predict churn using threshold 0.30
+        probabilities = model.predict_proba(customer_encoded)[0]
+        classes = list(model.classes_)
+
+        churn_probability = probabilities[classes.index("Yes")]
+
+        if churn_probability >= 0.30:
+            prediction = "Yes"
+        else:
+            prediction = "No"
 
         st.divider()
         st.header("📈 Prediction Result")
