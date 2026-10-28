@@ -52,11 +52,10 @@ st.caption(
 )
 
 metric_cols = st.columns(4)
-metric_cols[0].metric("Model Accuracy", "80.48%")
-metric_cols[1].metric("Churn Precision", "65.62%")
-metric_cols[2].metric("Churn Recall", "55.61%")
-metric_cols[3].metric("Churn F1-score", "60.20%")
-
+metric_cols[0].metric("Model Accuracy", "75.30%")
+metric_cols[1].metric("Churn Precision", "52.40%")
+metric_cols[2].metric("Churn Recall", "75.94%")
+metric_cols[3].metric("Churn F1-score", "62.01%")
 chart_col1, chart_col2 = st.columns(2)
 
 with chart_col1:
