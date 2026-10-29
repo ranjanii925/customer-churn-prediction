@@ -14,6 +14,7 @@ st.set_page_config(
 
 # Dark dashboard theme
 st.markdown(
+    """
    
     <style>
         .stApp {
