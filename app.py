@@ -130,6 +130,12 @@ with chart_col1:
         xaxis_title="Model",
         showlegend=False
     )
+    fig.update_layout(
+    template="plotly_white",
+    paper_bgcolor="white",
+    plot_bgcolor="white",
+    font_color="#111827"
+)
 
     st.plotly_chart(
         fig_performance,
@@ -164,6 +170,12 @@ with chart_col2:
         xaxis_title="Predicted Churn",
         yaxis_title="Actual Churn"
     )
+    fig.update_layout(
+    template="plotly_white",
+    paper_bgcolor="white",
+    plot_bgcolor="white",
+    font_color="#111827"
+)
 
     st.plotly_chart(
         fig_cm,
@@ -248,6 +260,12 @@ if dashboard_df is not None and "Churn" in dashboard_df.columns:
             hole=0.45,
             title="Customers Who Stayed vs Churned"
         )
+        fig.update_layout(
+    template="plotly_white",
+    paper_bgcolor="white",
+    plot_bgcolor="white",
+    font_color="#111827"
+)
 
         st.plotly_chart(
             fig_churn,
@@ -275,6 +293,12 @@ if dashboard_df is not None and "Churn" in dashboard_df.columns:
             yaxis_title="Number of Customers",
             showlegend=False
         )
+        fig.update_layout(
+    template="plotly_white",
+    paper_bgcolor="white",
+    plot_bgcolor="white",
+    font_color="#111827"
+)
 
         st.plotly_chart(
             fig_customer_count,
@@ -312,6 +336,12 @@ if (
             "Churn": "Churn Status"
         }
     )
+    fig.update_layout(
+    template="plotly_white",
+    paper_bgcolor="white",
+    plot_bgcolor="white",
+    font_color="#111827"
+)
 
     st.plotly_chart(
         fig_contract,
