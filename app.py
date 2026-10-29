@@ -5,82 +5,66 @@ from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Page Configuration
+# Page setup
 st.set_page_config(
-    page_title="Customer Churn Prediction",
-    page_icon="🎯",
-    layout="wide"
+    page_title="Customer Churn Dashboard",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-# Dark dashboard theme
+MODEL_PATH = Path(__file__).parent / "churn_prediction.pkl"
+DATA_PATH = Path(__file__).parent / "WA_Fn-UseC_-Telco-Customer-Churn.csv"
+
+# Simple dashboard theme
+NAVY = "#172B4D"
+TEAL = "#159D91"
+TEXT = "#F7F9FC"
+MUTED = "#AAB7C8"
+
 st.markdown(
-    """
+    f"""
     <style>
-        .stApp {
-            background-color: #111827;
-            color: #F9FAFB;
-        }
-
-        [data-testid="stHeader"] {
-            background-color: #111827;
-        }
-
-        [data-testid="stMetric"] {
-            background-color: #1F2937;
-            border: 1px solid #374151;
-            padding: 16px;
-            border-radius: 12px;
-        }
-
-        [data-testid="stMetricLabel"],
-        [data-testid="stMetricValue"] {
-            color: #F9FAFB;
-        }
-
-        div[data-testid="stForm"] {
-            background-color: #1F2937;
-            padding: 18px;
-            border-radius: 12px;
-        }
-
-        [data-testid="stSidebar"] {
-            background-color: #0B1220;
-        }
-
-        [data-testid="stSidebar"] label,
-        [data-testid="stSidebar"] p,
-        [data-testid="stSidebar"] h1,
-        [data-testid="stSidebar"] h2,
-        [data-testid="stSidebar"] h3 {
-            color: #F9FAFB;
-        }
+      .stApp {{ background-color: #F3F6FA; }}
+      [data-testid="stHeader"] {{ background-color: #F3F6FA; }}
+      [data-testid="stSidebar"] {{ background-color: {NAVY}; }}
+      [data-testid="stSidebar"] * {{ color: {TEXT}; }}
+      .block-container {{ padding-top: 1.2rem; padding-bottom: 1rem; max-width: 1400px; }}
+      h1, h2, h3 {{ color: {NAVY}; }}
+      [data-testid="stMetric"] {{ background: white; border: 1px solid #E0E6EF; border-radius: 8px; padding: 12px; }}
+      [data-testid="stMetricLabel"] {{ color: #5B6575 !important; }}
+      [data-testid="stMetricValue"] {{ color: {NAVY} !important; }}
+      [data-testid="stPlotlyChart"] {{ background: white; border: 1px solid #E0E6EF; border-radius: 8px; padding: 4px; }}
+      div[data-testid="stForm"] {{ border: 1px solid #344663; border-radius: 8px; padding: 10px; }}
+      .stButton button[kind="primary"], [data-testid="stFormSubmitButton"] button {{ background-color: {TEAL}; color: white; border: none; border-radius: 6px; }}
+      hr {{ border-color: #DDE4ED; }}
+      footer {{ visibility: hidden; }}
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 
-def style_chart(fig):
-    """Keep Plotly charts light while the app background stays dark."""
+def style_chart(fig, height=290):
     fig.update_layout(
         template="plotly_white",
         paper_bgcolor="white",
         plot_bgcolor="white",
-        font_color="#111827",
-        title_font_color="#111827",
-        margin=dict(l=25, r=25, t=60, b=25),
+        font=dict(color="#26364A", family="Arial", size=11),
+        title=dict(font=dict(size=14), x=0.02),
+        margin=dict(l=20, r=15, t=42, b=25),
+        height=height,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
+    fig.update_xaxes(showgrid=False, zeroline=False)
+    fig.update_yaxes(gridcolor="#E9EDF2", zeroline=False)
     return fig
-
-# Load Trained Model
-MODEL_PATH = Path(__file__).parent / "churn_prediction.pkl"
 
 
 @st.cache_resource
 def load_model():
     with open(MODEL_PATH, "rb") as file:
-        model = pickle.load(file)
-    return model
+        return pickle.load(file)
 
 
 try:
@@ -89,296 +73,154 @@ except Exception as error:
     st.error(f"Unable to load model: {error}")
     st.stop()
 
-
-# Application Header
-st.title("📊 Customer Churn Prediction")
-
-st.markdown(
-    """
-    ### Predict Customer Churn Using Machine Learning
-
-    Enter the customer's details below to predict whether
-    the customer is likely to leave the telecom service.
-    """
-)
-
-st.divider()
-
-# Analytical Dashboard
-st.header("📊 Customer Analytics Dashboard")
-st.caption(
-    "Model evaluation results are from the held-out test set. "
-    "Customer distribution charts use the public Telco churn CSV when it is available."
-)
-
-metric_cols = st.columns(4)
-metric_cols[0].metric("Model Accuracy", "80.48%")
-metric_cols[1].metric("Churn Precision", "65.62%")
-metric_cols[2].metric("Churn Recall", "55.61%")
-metric_cols[3].metric("Churn F1-score", "60.20%")
-
-chart_col1, chart_col2 = st.columns(2)
-
-with chart_col1:
-    st.subheader("Baseline vs Logistic Regression")
-    performance_df = pd.DataFrame({
-        "Model": ["Dummy Baseline", "Logistic Regression"],
-        "Accuracy (%)": [73.46, 80.48],
-    })
-    fig_performance = px.bar(
-        performance_df,
-        x="Model",
-        y="Accuracy (%)",
-        text="Accuracy (%)",
-        title="Accuracy Comparison",
-        range_y=[0, 100],
-    )
-    fig_performance.update_traces(texttemplate="%{text:.2f}%", textposition="outside")
-    style_chart(fig_performance)
-    st.plotly_chart(fig_performance, use_container_width=True)
-
-with chart_col2:
-    st.subheader("Confusion Matrix")
-    # Rows: actual [No, Yes]; columns: predicted [No, Yes].
-    confusion_values = [[926, 109], [166, 208]]
-    fig_cm = go.Figure(data=go.Heatmap(
-        z=confusion_values,
-        x=["Predicted: No", "Predicted: Yes"],
-        y=["Actual: No", "Actual: Yes"],
-        text=confusion_values,
-        texttemplate="%{text}",
-        colorscale="Blues",
-        showscale=True,
-    ))
-    fig_cm.update_layout(title="Test Set Predictions", xaxis_title="Prediction", yaxis_title="Actual")
-    style_chart(fig_cm)
-    st.plotly_chart(fig_cm, use_container_width=True)
-
-# Optional dataset-driven charts. Keep the CSV beside app.py in the deployed repo.
-DATA_PATH = Path(__file__).parent / "WA_Fn-UseC_-Telco-Customer-Churn.csv"
+# Load the dataset if it is available.
+dashboard_df = None
 if DATA_PATH.exists():
     try:
         dashboard_df = pd.read_csv(DATA_PATH)
-        if "Churn" in dashboard_df.columns:
-            st.subheader("Customer Churn Distribution")
-            churn_counts = (
-                dashboard_df["Churn"]
-                .value_counts()
-                .rename_axis("Churn Status")
-                .reset_index(name="Customers")
-            )
-            churn_fig = px.pie(
-                churn_counts,
-                names="Churn Status",
-                values="Customers",
-                hole=0.20,
-                title="Customers Who Stayed vs Churned",
-            )
-            style_chart(churn_fig)
-            st.plotly_chart(churn_fig, use_container_width=True)
-
-            if "Contract" in dashboard_df.columns:
-                st.subheader("Churn by Contract Type")
-                contract_churn = (
-                    dashboard_df.groupby(["Contract", "Churn"]).size()
-                    .reset_index(name="Customers")
-                )
-                contract_fig = px.bar(
-                    contract_churn,
-                    x="Contract",
-                    y="Customers",
-                    color="Churn",
-                    barmode="group",
-                    title="Customer Churn Across Contract Types",
-                )
-                style_chart(contract_fig)
-                st.plotly_chart(contract_fig, use_container_width=True)
     except Exception as error:
-        st.warning(f"Could not load dashboard dataset: {error}")
-else:
-    st.info(
-        "To show customer distribution and contract charts, add "
-        "'WA_Fn-UseC_-Telco-Customer-Churn.csv' to the same GitHub repository as app.py."
-    )
+        st.warning(f"Dataset could not be loaded: {error}")
 
-st.divider()
-
-# Customer Input Form - keep it in the sidebar so it stays separate from the dashboard
-st.sidebar.title("👤 Customer Information")
-st.sidebar.caption("Enter customer details and click Predict Churn.")
-
-with st.sidebar.form("customer_form"):
-    st.markdown("### Personal Details")
-
+# Customer details form
+st.sidebar.markdown("## Customer prediction")
+st.sidebar.caption("Enter the customer details below to predict churn.")
+with st.sidebar.form("customer_form", border=True):
+    st.markdown("**Customer profile**")
     gender = st.selectbox("Gender", ["Female", "Male"])
-    senior_citizen = st.selectbox(
-        "Senior Citizen", [0, 1],
-        format_func=lambda x: "Yes" if x == 1 else "No"
-    )
+    senior_citizen = st.selectbox("Senior citizen", [0, 1], format_func=lambda x: "Yes" if x == 1 else "No")
     partner = st.selectbox("Partner", ["Yes", "No"])
     dependents = st.selectbox("Dependents", ["Yes", "No"])
-    tenure = st.number_input(
-        "Tenure (Months)", min_value=0, max_value=72, value=12, step=1
-    )
+    tenure = st.number_input("Tenure (months)", min_value=0, max_value=72, value=12, step=1)
 
-    st.markdown("### Phone Services")
-    phone_service = st.selectbox("Phone Service", ["Yes", "No"])
-    multiple_lines = st.selectbox(
-        "Multiple Lines", ["No", "Yes", "No phone service"]
-    )
+    st.markdown("**Services**")
+    phone_service = st.selectbox("Phone service", ["Yes", "No"])
+    multiple_lines = st.selectbox("Multiple lines", ["No", "Yes", "No phone service"])
+    internet_service = st.selectbox("Internet service", ["DSL", "Fiber optic", "No"])
+    online_security = st.selectbox("Online security", ["No", "Yes", "No internet service"])
+    online_backup = st.selectbox("Online backup", ["No", "Yes", "No internet service"])
+    device_protection = st.selectbox("Device protection", ["No", "Yes", "No internet service"])
+    tech_support = st.selectbox("Tech support", ["No", "Yes", "No internet service"])
+    streaming_tv = st.selectbox("Streaming TV", ["No", "Yes", "No internet service"])
+    streaming_movies = st.selectbox("Streaming movies", ["No", "Yes", "No internet service"])
 
-    st.markdown("### Internet Services")
-    internet_service = st.selectbox(
-        "Internet Service", ["DSL", "Fiber optic", "No"]
-    )
-    online_security = st.selectbox(
-        "Online Security", ["No", "Yes", "No internet service"]
-    )
-    online_backup = st.selectbox(
-        "Online Backup", ["No", "Yes", "No internet service"]
-    )
-    device_protection = st.selectbox(
-        "Device Protection", ["No", "Yes", "No internet service"]
-    )
-    tech_support = st.selectbox(
-        "Tech Support", ["No", "Yes", "No internet service"]
-    )
-    streaming_tv = st.selectbox(
-        "Streaming TV", ["No", "Yes", "No internet service"]
-    )
-    streaming_movies = st.selectbox(
-        "Streaming Movies", ["No", "Yes", "No internet service"]
-    )
+    st.markdown("**Contract and billing**")
+    contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
+    paperless_billing = st.selectbox("Paperless billing", ["Yes", "No"])
+    payment_method = st.selectbox("Payment method", ["Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"])
+    monthly_charges = st.number_input("Monthly charges ($)", min_value=0.0, value=70.0, step=1.0)
+    total_charges = st.number_input("Total charges ($)", min_value=0.0, value=840.0, step=10.0)
+    submitted = st.form_submit_button("Predict churn", type="primary", use_container_width=True)
 
-    st.markdown("### Contract Information")
-    contract = st.selectbox(
-        "Contract", ["Month-to-month", "One year", "Two year"]
-    )
-    paperless_billing = st.selectbox("Paperless Billing", ["Yes", "No"])
-    payment_method = st.selectbox(
-        "Payment Method",
-        [
-            "Electronic check",
-            "Mailed check",
-            "Bank transfer (automatic)",
-            "Credit card (automatic)"
-        ]
-    )
-
-    st.markdown("### Billing Information")
-    monthly_charges = st.number_input(
-        "Monthly Charges", min_value=0.0, value=70.0, step=1.0
-    )
-    total_charges = st.number_input(
-        "Total Charges", min_value=0.0, value=840.0, step=10.0
-    )
-
-    submitted = st.form_submit_button(
-        "🔍 Predict Churn", type="primary", use_container_width=True
-    )
+# Dashboard heading
+st.title("Customer Churn Dashboard")
+st.caption("View model results and explore customer churn patterns.")
 
 
-# Prediction Section
+# Show the prediction result
 if submitted:
-
     customer_data = pd.DataFrame([{
-        "gender": gender,
-        "SeniorCitizen": senior_citizen,
-        "Partner": partner,
-        "Dependents": dependents,
-        "tenure": tenure,
-        "PhoneService": phone_service,
-        "MultipleLines": multiple_lines,
-        "InternetService": internet_service,
-        "OnlineSecurity": online_security,
-        "OnlineBackup": online_backup,
-        "DeviceProtection": device_protection,
-        "TechSupport": tech_support,
-        "StreamingTV": streaming_tv,
-        "StreamingMovies": streaming_movies,
-        "Contract": contract,
-        "PaperlessBilling": paperless_billing,
-        "PaymentMethod": payment_method,
-        "MonthlyCharges": monthly_charges,
-        "TotalCharges": total_charges
+        "gender": gender, "SeniorCitizen": senior_citizen, "Partner": partner,
+        "Dependents": dependents, "tenure": tenure, "PhoneService": phone_service,
+        "MultipleLines": multiple_lines, "InternetService": internet_service,
+        "OnlineSecurity": online_security, "OnlineBackup": online_backup,
+        "DeviceProtection": device_protection, "TechSupport": tech_support,
+        "StreamingTV": streaming_tv, "StreamingMovies": streaming_movies,
+        "Contract": contract, "PaperlessBilling": paperless_billing,
+        "PaymentMethod": payment_method, "MonthlyCharges": monthly_charges,
+        "TotalCharges": total_charges,
     }])
-
     try:
-        # Apply the same encoding used during training
-        customer_encoded = pd.get_dummies(
-            customer_data,
-            drop_first=True,
-            dtype=int
-        )
-
-        # Match the training columns and their order
+        customer_encoded = pd.get_dummies(customer_data, drop_first=True, dtype=int)
         if not hasattr(model, "feature_names_in_"):
-            st.error(
-                "Model feature names are unavailable. "
-                "Please check the model training code."
-            )
+            st.error("Model feature names are unavailable. Please check the model training code.")
             st.stop()
-
-        customer_encoded = customer_encoded.reindex(
-            columns=model.feature_names_in_,
-            fill_value=0
-        )
-
-        # Predict churn
+        customer_encoded = customer_encoded.reindex(columns=model.feature_names_in_, fill_value=0)
         prediction = model.predict(customer_encoded)[0]
-
-        st.divider()
-        st.header("📈 Prediction Result")
-
-        if prediction == "Yes":
-            st.error(
-                "⚠️ Customer Churn Predicted: "
-                "This customer may leave the service."
-            )
-        else:
-            st.success(
-                "✅ Customer Retention Predicted: "
-                "This customer may continue using the service."
-            )
-
-        # Display churn probability
         if hasattr(model, "predict_proba"):
             probabilities = model.predict_proba(customer_encoded)[0]
             classes = list(model.classes_)
+            churn_probability = float(probabilities[classes.index("Yes")] * 100) if "Yes" in classes else None
+        else:
+            churn_probability = None
 
-            if "Yes" in classes:
-                churn_probability = (
-                    probabilities[classes.index("Yes")] * 100
-                )
-
-                st.metric(
-                    "Estimated Churn Probability",
-                    f"{churn_probability:.2f}%"
-                )
-
-                st.progress(
-                    min(max(float(churn_probability) / 100, 0.0), 1.0)
-                )
-
-        with st.expander("View Customer Details"):
-            st.dataframe(
-                customer_data,
-                use_container_width=True
-            )
-
-        st.caption(
-            "Note: Predictions are estimates from a Machine Learning "
-            "model and are not guarantees of future customer behaviour."
-        )
-
+        if prediction == "Yes":
+            st.error("⚠️ **High attention:** the model predicts this customer may churn.")
+        else:
+            st.success("✅ **Retention outlook:** the model predicts this customer may stay.")
+        if churn_probability is not None:
+            result_cols = st.columns([1, 2, 2])
+            result_cols[0].metric("Estimated churn risk", f"{churn_probability:.1f}%")
+            result_cols[1].progress(min(max(churn_probability / 100, 0.0), 1.0), text="Estimated churn probability")
+            result_cols[2].metric("Customer tenure", f"{tenure} months")
+        with st.expander("View submitted customer details"):
+            st.dataframe(customer_data, use_container_width=True, hide_index=True)
+        st.caption("This result is an estimate from the model, not a guarantee of customer behaviour.")
     except Exception as error:
         st.error(f"Prediction error: {error}")
 
+# Model performance summary
+st.subheader("Model performance")
+kpi1, kpi2, kpi3, kpi4 = st.columns(4, gap="small")
+kpi1.metric("Model accuracy", "80.48%", help="Overall correct predictions on the held-out test set.")
+kpi2.metric("Churn precision", "65.62%", help="Of customers predicted to churn, this share actually churned.")
+kpi3.metric("Churn recall", "55.61%", help="Of customers who churned, this share was detected by the model.")
+kpi4.metric("Churn F1-score", "60.20%", help="Balance between churn precision and recall.")
 
-# Footer
-st.divider()
+# Tabs keep related charts together and reduce page scrolling.
+tab_overview, tab_model, tab_segments = st.tabs(["Overview", "Model performance", "Customer segments"])
 
-st.caption(
-    "Customer Churn Prediction | Logistic Regression | "
-    "Machine Learning Project"
-)
+with tab_overview:
+    left, right = st.columns([1.05, 1], gap="medium")
+    with left:
+        st.markdown("#### Model accuracy")
+        performance_df = pd.DataFrame({"Model": ["Dummy baseline", "Logistic regression"], "Accuracy (%)": [73.46, 80.48]})
+        fig = px.bar(performance_df, x="Model", y="Accuracy (%)", text="Accuracy (%)", range_y=[0, 100], color="Model", color_discrete_sequence=["#AAB7C8", TEAL])
+        fig.update_traces(texttemplate="%{text:.2f}%", textposition="outside", cliponaxis=False)
+        fig.update_layout(showlegend=False, yaxis_title="Accuracy (%)", xaxis_title="")
+        st.plotly_chart(style_chart(fig, 285), use_container_width=True, config={"displayModeBar": False})
+    with right:
+        st.markdown("#### Confusion matrix")
+        cm = go.Figure(data=go.Heatmap(z=[[926, 109], [166, 208]], x=["Predicted No", "Predicted Yes"], y=["Actual No", "Actual Yes"], text=[[926, 109], [166, 208]], texttemplate="%{text}", colorscale=[[0, "#E8F7F4"], [0.5, "#73D8C7"], [1, "#167D76"]], showscale=False, hovertemplate="%{y}<br>%{x}<br>Customers: %{z}<extra></extra>"))
+        cm.update_layout(xaxis_title="", yaxis_title="", yaxis=dict(autorange="reversed"))
+        st.plotly_chart(style_chart(cm, 285), use_container_width=True, config={"displayModeBar": False})
+    st.caption("The benchmark and confusion matrix are fixed evaluation results from this project's held-out test set.")
+
+with tab_model:
+    left, right = st.columns(2, gap="medium")
+    with left:
+        st.markdown("#### Churn metrics")
+        quality_df = pd.DataFrame({"Metric": ["Precision", "Recall", "F1-score"], "Score (%)": [65.62, 55.61, 60.20]})
+        fig = px.bar(quality_df, x="Metric", y="Score (%)", text="Score (%)", range_y=[0, 100], color="Metric", color_discrete_sequence=[BLUE, TEAL, "#F6B85F"])
+        fig.update_traces(texttemplate="%{text:.2f}%", textposition="outside", cliponaxis=False)
+        fig.update_layout(showlegend=False, xaxis_title="", yaxis_title="Score (%)")
+        st.plotly_chart(style_chart(fig, 300), use_container_width=True, config={"displayModeBar": False})
+    with right:
+        st.markdown("#### Prediction results")
+        pred_df = pd.DataFrame({"Prediction": ["Correct stay predictions", "False churn alerts", "Missed churn", "Correct churn predictions"], "Customers": [926, 109, 166, 208]})
+        fig = px.bar(pred_df, x="Customers", y="Prediction", orientation="h", text="Customers", color="Prediction", color_discrete_sequence=["#21B99F", "#6C8CFF", "#F6B85F", "#167D76"])
+        fig.update_layout(showlegend=False, xaxis_title="Customers", yaxis_title="")
+        st.plotly_chart(style_chart(fig, 300), use_container_width=True, config={"displayModeBar": False})
+    st.info("Recall is 55.61%, so the model misses some customers who actually churn. This is an important area to improve before using the model for real retention decisions.")
+
+with tab_segments:
+    if dashboard_df is not None and "Churn" in dashboard_df.columns:
+        left, right = st.columns(2, gap="medium")
+        with left:
+            st.markdown("#### Customer churn")
+            churn_counts = dashboard_df["Churn"].value_counts().rename_axis("Churn status").reset_index(name="Customers")
+            fig = px.pie(churn_counts, names="Churn status", values="Customers", hole=0.62, color="Churn status", color_discrete_map={"No": TEAL, "Yes": "#F06A79"})
+            fig.update_traces(textposition="inside", textinfo="percent+label")
+            st.plotly_chart(style_chart(fig, 300), use_container_width=True, config={"displayModeBar": False})
+        with right:
+            if "Contract" in dashboard_df.columns:
+                st.markdown("#### Churn by contract type")
+                contract_df = dashboard_df.groupby(["Contract", "Churn"]).size().reset_index(name="Customers")
+                fig = px.bar(contract_df, x="Contract", y="Customers", color="Churn", barmode="group", color_discrete_map={"No": TEAL, "Yes": "#F06A79"})
+                fig.update_layout(xaxis_title="Contract type", yaxis_title="Customers", legend_title="Churn")
+                st.plotly_chart(style_chart(fig, 300), use_container_width=True, config={"displayModeBar": False})
+        st.caption(f"Customer segment charts are calculated from the dataset in the repository ({len(dashboard_df):,} rows).")
+    else:
+        st.info("To enable customer segment charts, add `WA_Fn-UseC_-Telco-Customer-Churn.csv` beside `app.py` in the GitHub repository.")
+
+st.markdown("---")
+st.caption("Customer Churn Prediction | Logistic Regression")
