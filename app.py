@@ -14,6 +14,27 @@ st.set_page_config(
     page_icon="🎯",
     layout="wide"
 )
+```python
+st.markdown("""
+<style>
+    .stApp {
+        background-color: #111827;
+        color: #F9FAFB;
+    }
+
+    [data-testid="stMetric"] {
+        background-color: #1F2937;
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    h1, h2, h3, p, label {
+        color: #F9FAFB;
+    }
+</style>
+""", unsafe_allow_html=True)
+```
+
 
 BASE_DIR = Path(__file__).parent
 MODEL_PATH = BASE_DIR / "churn_prediction.pkl"
@@ -37,7 +58,7 @@ except Exception as error:
 
 
 
-st.title("🔍 Customer Churn Prediction")
+st.title("📈 Customer Churn Prediction")
 
 st.markdown(
     """
@@ -52,7 +73,7 @@ st.markdown(
 st.divider()
 
 
-st.header("📈 Customer Analytics Dashboard")
+st.header("💹Customer Analytics Dashboard")
 
 st.caption(
     "The model metrics below are from the held-out test set "
@@ -333,7 +354,7 @@ if (
 if dashboard_df is not None and "Churn" in dashboard_df.columns:
 
     st.divider()
-    st.subheader("✨ Business Insights")
+    st.subheader("🔎 Business Insights")
 
     if total_customers > 0:
 
