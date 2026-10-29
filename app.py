@@ -78,7 +78,7 @@ with chart_col1:
 with chart_col2:
     st.subheader("Confusion Matrix")
     # Rows: actual [No, Yes]; columns: predicted [No, Yes].
-    confusion_values = [[926, 109], [166, 208]]
+    confusion_values = [[777, 258], [90, 284]]
     fig_cm = go.Figure(data=go.Heatmap(
         z=confusion_values,
         x=["Predicted: No", "Predicted: Yes"],
