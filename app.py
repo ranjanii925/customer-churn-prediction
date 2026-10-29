@@ -8,14 +8,13 @@ import plotly.graph_objects as go
 # Page Configuration
 st.set_page_config(
     page_title="Customer Churn Prediction",
-    page_icon="🎯",
+    page_icon="📊",
     layout="wide"
 )
 
 # Dark dashboard theme
 st.markdown(
     """
-   
     <style>
         .stApp {
             background-color: #111827;
@@ -42,6 +41,18 @@ st.markdown(
             background-color: #1F2937;
             padding: 18px;
             border-radius: 12px;
+        }
+
+        [data-testid="stSidebar"] {
+            background-color: #0B1220;
+        }
+
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] h1,
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] h3 {
+            color: #F9FAFB;
         }
     </style>
     """,
@@ -80,7 +91,7 @@ except Exception as error:
 
 
 # Application Header
-st.title("📈 Customer Churn Prediction")
+st.title("📊 Customer Churn Prediction")
 
 st.markdown(
     """
@@ -192,141 +203,78 @@ else:
 
 st.divider()
 
-# Customer Input Form
-st.subheader("👩‍💼 Customer Information")
+# Customer Input Form - keep it in the sidebar so it stays separate from the dashboard
+st.sidebar.title("👤 Customer Information")
+st.sidebar.caption("Enter customer details and click Predict Churn.")
 
-with st.form("customer_form"):
+with st.sidebar.form("customer_form"):
+    st.markdown("### Personal Details")
 
-    col1, col2 = st.columns(2)
+    gender = st.selectbox("Gender", ["Female", "Male"])
+    senior_citizen = st.selectbox(
+        "Senior Citizen", [0, 1],
+        format_func=lambda x: "Yes" if x == 1 else "No"
+    )
+    partner = st.selectbox("Partner", ["Yes", "No"])
+    dependents = st.selectbox("Dependents", ["Yes", "No"])
+    tenure = st.number_input(
+        "Tenure (Months)", min_value=0, max_value=72, value=12, step=1
+    )
 
-    with col1:
-        st.markdown("### Personal Details")
+    st.markdown("### Phone Services")
+    phone_service = st.selectbox("Phone Service", ["Yes", "No"])
+    multiple_lines = st.selectbox(
+        "Multiple Lines", ["No", "Yes", "No phone service"]
+    )
 
-        gender = st.selectbox(
-            "Gender",
-            ["Female", "Male"]
-        )
+    st.markdown("### Internet Services")
+    internet_service = st.selectbox(
+        "Internet Service", ["DSL", "Fiber optic", "No"]
+    )
+    online_security = st.selectbox(
+        "Online Security", ["No", "Yes", "No internet service"]
+    )
+    online_backup = st.selectbox(
+        "Online Backup", ["No", "Yes", "No internet service"]
+    )
+    device_protection = st.selectbox(
+        "Device Protection", ["No", "Yes", "No internet service"]
+    )
+    tech_support = st.selectbox(
+        "Tech Support", ["No", "Yes", "No internet service"]
+    )
+    streaming_tv = st.selectbox(
+        "Streaming TV", ["No", "Yes", "No internet service"]
+    )
+    streaming_movies = st.selectbox(
+        "Streaming Movies", ["No", "Yes", "No internet service"]
+    )
 
-        senior_citizen = st.selectbox(
-            "Senior Citizen",
-            [0, 1],
-            format_func=lambda x: "Yes" if x == 1 else "No"
-        )
+    st.markdown("### Contract Information")
+    contract = st.selectbox(
+        "Contract", ["Month-to-month", "One year", "Two year"]
+    )
+    paperless_billing = st.selectbox("Paperless Billing", ["Yes", "No"])
+    payment_method = st.selectbox(
+        "Payment Method",
+        [
+            "Electronic check",
+            "Mailed check",
+            "Bank transfer (automatic)",
+            "Credit card (automatic)"
+        ]
+    )
 
-        partner = st.selectbox(
-            "Partner",
-            ["Yes", "No"]
-        )
-
-        dependents = st.selectbox(
-            "Dependents",
-            ["Yes", "No"]
-        )
-
-        tenure = st.number_input(
-            "Tenure (Months)",
-            min_value=0,
-            max_value=72,
-            value=12,
-            step=1
-        )
-
-        st.markdown("### Phone Services")
-
-        phone_service = st.selectbox(
-            "Phone Service",
-            ["Yes", "No"]
-        )
-
-        multiple_lines = st.selectbox(
-            "Multiple Lines",
-            ["No", "Yes", "No phone service"]
-        )
-
-        st.markdown("### Internet Services")
-
-        internet_service = st.selectbox(
-            "Internet Service",
-            ["DSL", "Fiber optic", "No"]
-        )
-
-        online_security = st.selectbox(
-            "Online Security",
-            ["No", "Yes", "No internet service"]
-        )
-
-        online_backup = st.selectbox(
-            "Online Backup",
-            ["No", "Yes", "No internet service"]
-        )
-
-        device_protection = st.selectbox(
-            "Device Protection",
-            ["No", "Yes", "No internet service"]
-        )
-
-    with col2:
-        st.markdown("### Additional Services")
-
-        tech_support = st.selectbox(
-            "Tech Support",
-            ["No", "Yes", "No internet service"]
-        )
-
-        streaming_tv = st.selectbox(
-            "Streaming TV",
-            ["No", "Yes", "No internet service"]
-        )
-
-        streaming_movies = st.selectbox(
-            "Streaming Movies",
-            ["No", "Yes", "No internet service"]
-        )
-
-        st.markdown("### Contract Information")
-
-        contract = st.selectbox(
-            "Contract",
-            ["Month-to-month", "One year", "Two year"]
-        )
-
-        paperless_billing = st.selectbox(
-            "Paperless Billing",
-            ["Yes", "No"]
-        )
-
-        payment_method = st.selectbox(
-            "Payment Method",
-            [
-                "Electronic check",
-                "Mailed check",
-                "Bank transfer (automatic)",
-                "Credit card (automatic)"
-            ]
-        )
-
-        st.markdown("### Billing Information")
-
-        monthly_charges = st.number_input(
-            "Monthly Charges",
-            min_value=0.0,
-            value=70.0,
-            step=1.0
-        )
-
-        total_charges = st.number_input(
-            "Total Charges",
-            min_value=0.0,
-            value=840.0,
-            step=10.0
-        )
-
-    st.divider()
+    st.markdown("### Billing Information")
+    monthly_charges = st.number_input(
+        "Monthly Charges", min_value=0.0, value=70.0, step=1.0
+    )
+    total_charges = st.number_input(
+        "Total Charges", min_value=0.0, value=840.0, step=10.0
+    )
 
     submitted = st.form_submit_button(
-        "🔍 Predict Churn",
-        type="primary",
-        use_container_width=True
+        "🔍 Predict Churn", type="primary", use_container_width=True
     )
 
 
@@ -380,7 +328,7 @@ if submitted:
         prediction = model.predict(customer_encoded)[0]
 
         st.divider()
-        st.header("🔍 Prediction Result")
+        st.header("📈 Prediction Result")
 
         if prediction == "Yes":
             st.error(
