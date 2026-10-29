@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 # Page Configuration
 st.set_page_config(
     page_title="Customer Churn Prediction",
-    page_icon="📊",
+    page_icon="🎯",
     layout="wide"
 )
 
@@ -171,7 +171,7 @@ if DATA_PATH.exists():
                 churn_counts,
                 names="Churn Status",
                 values="Customers",
-                hole=0.45,
+                hole=0.20,
                 title="Customers Who Stayed vs Churned",
             )
             style_chart(churn_fig)
