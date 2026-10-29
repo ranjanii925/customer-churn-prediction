@@ -14,7 +14,7 @@ st.set_page_config(
     page_icon="🎯",
     layout="wide"
 )
-```python
+
 st.markdown("""
 <style>
     .stApp {
@@ -33,7 +33,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-```
 
 
 BASE_DIR = Path(__file__).parent
