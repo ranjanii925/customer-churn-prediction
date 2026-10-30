@@ -28,7 +28,31 @@ st.markdown(
       .stApp {{ background-color: #F3F6FA; }}
       [data-testid="stHeader"] {{ background-color: #F3F6FA; }}
       [data-testid="stSidebar"] {{ background-color: {NAVY}; }}
-      [data-testid="stSidebar"] * {{ color: {TEXT}; }}
+      [data-testid="stSidebar"] h1,
+      [data-testid="stSidebar"] h2,
+      [data-testid="stSidebar"] h3,
+      [data-testid="stSidebar"] label,
+      [data-testid="stSidebar"] p,
+      [data-testid="stSidebar"] .stCaption {{ color: {TEXT} !important; }}
+      /* Keep form fields light with dark text so entered values stay readable. */
+      [data-testid="stSidebar"] input,
+      [data-testid="stSidebar"] textarea {{
+        background-color: #FFFFFF !important;
+        color: #172B4D !important;
+        -webkit-text-fill-color: #172B4D !important;
+      }}
+      [data-testid="stSidebar"] [data-baseweb="select"] > div {{
+        background-color: #FFFFFF !important;
+        color: #172B4D !important;
+      }}
+      [data-testid="stSidebar"] [data-baseweb="select"] div,
+      [data-testid="stSidebar"] [data-baseweb="select"] span {{
+        color: #172B4D !important;
+        -webkit-text-fill-color: #172B4D !important;
+      }}
+      [data-baseweb="popover"] {{ color: #172B4D !important; }}
+      [data-baseweb="menu"] {{ background-color: #FFFFFF !important; }}
+      [data-baseweb="menu"] * {{ color: #172B4D !important; }}
       .block-container {{ padding-top: 1.2rem; padding-bottom: 1rem; max-width: 1400px; }}
       h1, h2, h3 {{ color: {NAVY}; }}
       [data-testid="stMetric"] {{ background: white; border: 1px solid #E0E6EF; border-radius: 8px; padding: 12px; }}
