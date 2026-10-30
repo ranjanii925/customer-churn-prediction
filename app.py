@@ -190,7 +190,7 @@ with tab_model:
     with left:
         st.markdown("#### Churn metrics")
         quality_df = pd.DataFrame({"Metric": ["Precision", "Recall", "F1-score"], "Score (%)": [65.62, 55.61, 60.20]})
-        fig = px.bar(quality_df, x="Metric", y="Score (%)", text="Score (%)", range_y=[0, 100], color="Metric", color_discrete_sequence=[BLUE, TEAL, "#F6B85F"])
+        fig = px.bar(quality_df, x="Metric", y="Score (%)", text="Score (%)", range_y=[0, 100], color="Metric", color_discrete_sequence=["#6C8CFF", TEAL, "#F6B85F"])
         fig.update_traces(texttemplate="%{text:.2f}%", textposition="outside", cliponaxis=False)
         fig.update_layout(showlegend=False, xaxis_title="", yaxis_title="Score (%)")
         st.plotly_chart(style_chart(fig, 300), use_container_width=True, config={"displayModeBar": False})
