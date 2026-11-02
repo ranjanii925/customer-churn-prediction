@@ -105,7 +105,7 @@ if DATA_PATH.exists():
         st.warning(f"Dataset could not be loaded: {error}")
 
 # Customer details form
-st.sidebar.markdown("##Customer prediction")
+st.sidebar.markdown("Customer prediction")
 st.sidebar.caption("Enter the customer details below to predict churn.")
 with st.sidebar.form("customer_form", border=True):
     st.markdown("**Customer profile**")
