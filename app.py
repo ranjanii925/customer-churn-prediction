@@ -8,7 +8,6 @@ import plotly.graph_objects as go
 # Page setup
 st.set_page_config(
     page_title="Customer Churn Dashboard",
-    page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -106,7 +105,7 @@ if DATA_PATH.exists():
         st.warning(f"Dataset could not be loaded: {error}")
 
 # Customer details form
-st.sidebar.markdown("## 👩‍💼 Customer prediction")
+st.sidebar.markdown("##Customer prediction")
 st.sidebar.caption("Enter the customer details below to predict churn.")
 with st.sidebar.form("customer_form", border=True):
     st.markdown("**Customer profile**")
@@ -136,7 +135,7 @@ with st.sidebar.form("customer_form", border=True):
     submitted = st.form_submit_button("Predict churn", type="primary", use_container_width=True)
 
 # Dashboard heading
-st.title("📈 Customer Churn Dashboard")
+st.title(" Customer Churn Dashboard")
 st.caption("View model results and explore customer churn patterns.")
 
 
@@ -168,9 +167,9 @@ if submitted:
             churn_probability = None
 
         if prediction == "Yes":
-            st.error("⚠️ **High attention:** the model predicts this customer may churn.")
+            st.error("**High attention:** the model predicts this customer may churn.")
         else:
-            st.success("✅ **Retention outlook:** the model predicts this customer may stay.")
+            st.success("**Retention outlook:** the model predicts this customer may stay.")
         if churn_probability is not None:
             result_cols = st.columns([1, 2, 2])
             result_cols[0].metric("Estimated churn risk", f"{churn_probability:.1f}%")
